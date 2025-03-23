@@ -1,5 +1,6 @@
 ﻿using MauiAppMinhasCompras.Models;
 using SQLite;
+using static SQLite.SQLite3;
 
 namespace MauiAppMinhasCompras.Helpers
 {
@@ -25,9 +26,17 @@ namespace MauiAppMinhasCompras.Helpers
                 sql, p.Descricao, p.Quantidade, p.Preco, p.Id
                 );
         }
-        public Task<int> Delete(int id) 
+        public async Task<int> Delete(int id)
         {
-            return _conn.Table<Produto>().DeleteAsync(i => i.Id == id);
+            int result = await _conn.Table<Produto>().DeleteAsync(i => i.Id == id);
+
+            var count = await _conn.Table<Produto>().CountAsync();
+            if (count == 0)
+            {
+                await _conn.ExecuteAsync("DELETE FROM sqlite_sequence WHERE name='Produto'");
+            }
+
+            return result;
         }
         public Task<List<Produto>> GetALL() 
         {
