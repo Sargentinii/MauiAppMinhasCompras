@@ -7,6 +7,8 @@ namespace MauiAppMinhasCompras
         public App()
         {
             InitializeComponent();
+
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("pt-BR"); 
         }
 
         static SQLiteDatabaseHelper _db;
