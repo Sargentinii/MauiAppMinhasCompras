@@ -11,6 +11,10 @@ public partial class ListaProduto : ContentPage
     {
         InitializeComponent();
 
+        // Preencher o Picker com as categorias
+        filtroCategoriaPicker.ItemsSource = Enum.GetValues(typeof(Categoria)).Cast<Categoria>().ToList();
+
+
         lst_produtos.ItemsSource = lista;
     }
 
@@ -70,11 +74,30 @@ public partial class ListaProduto : ContentPage
     {
         try
         {
-            double soma = lista.Sum(i => i.Total);
+            // Agrupa os produtos por categoria e calcula o total gasto em cada categoria
+            var totaisPorCategoria = lista.GroupBy(i => i.Categoria)// Agrupa os produtos por categoria
+                                          .Select(grupo => new
+                                          {
+                                              Categoria = grupo.Key, // Pega o nome da categoria
+                                              Total = grupo.Sum(i => i.Total) // Soma os valores dos produtos dessa categoria
+                                          })
+                                          .ToList();
 
-            string msg = $"O total é {soma:C}";
+            // Cria a mensagem do alerta que mostrará o total gasto por categoria
+            string msg = "Total por Categoria:\n";
 
-            DisplayAlert("Total dos Produtos", msg, "OK");
+            // Percorre cada categoria e adiciona ao resumo
+            foreach (var item in totaisPorCategoria)
+            {
+                msg += $"{item.Categoria}: {item.Total:C}\n"; // Adiciona o nome da categoria e o total formatado em moeda
+            }
+
+            // Calcula o total geral (soma de todas as categorias)
+            double totalGeral = lista.Sum(i => i.Total);
+            msg += $"\nTotal Geral: {totalGeral:C}"; // Adiciona o total geral ao resumo
+
+            // Exibe um alerta mostrando o total gasto por categoria e o total geral
+            DisplayAlert("Resumo de Compras", msg, "OK");
         }
         catch (Exception ex)
         {
@@ -138,6 +161,30 @@ public partial class ListaProduto : ContentPage
         finally
         {
             lst_produtos.IsRefreshing = false;
+        }
+    }
+
+    private void FiltroCategoriaPicker_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            // Verifica se "Sem Filtro" foi selecionado
+            if (filtroCategoriaPicker.SelectedItem.ToString() == "Limpar")
+            {
+                // Mostra todos os produtos
+                lst_produtos.ItemsSource = lista;
+                return;
+            }
+
+            // Caso contrário, filtra os produtos pela categoria selecionada
+            Categoria categoriaSelecionada = (Categoria)filtroCategoriaPicker.SelectedItem;
+            var produtosFiltrados = lista.Where(p => p.Categoria == categoriaSelecionada).ToList();
+
+            lst_produtos.ItemsSource = produtosFiltrados;
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Ops!", ex.Message, "OK");
         }
     }
 }

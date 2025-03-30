@@ -10,6 +10,10 @@ namespace MauiAppMinhasCompras.Models
 
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
+        // Propriedade para armazenar a categoria do produto
+        // O tipo "Categoria" é um enum (definido abaixo), o que significa que o usuário 
+        // só poderá escolher entre as opções pré-definidas (Alimentos, Higiene, etc.)
+        public Categoria Categoria { get; set; }
         public string Descricao
         {
             get => _descricao;
@@ -51,5 +55,18 @@ namespace MauiAppMinhasCompras.Models
         }
         public double Total { get => Quantidade * Preco; }
 
+    }
+
+    // Enum que define as categorias disponíveis para os produtos
+    // Isso garante que o usuário escolha uma categoria válida, em vez de digitar livremente
+    public enum Categoria
+    {
+        Alimentos,
+        Higiene,
+        Limpeza,
+        Bebidas,
+        Eletronicos,
+        Outros,
+        Limpar
     }
 }
